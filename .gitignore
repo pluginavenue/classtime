@@ -1,0 +1,39 @@
+# Ignore OS/system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore log files
+*.log
+debug.log
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore node/npm files if used
+node_modules/
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# Ignore Composer dependencies if not bundled
+vendor/
+composer.lock
+
+# Ignore Freemius SDK dev tools (optional)
+freemius/.git/
+freemius/.github/
+freemius/dev/
+
+# Ignore WordPress backups or temp files
+*.zip
+*.bak
+*.tmp
+~*
+
+# Ignore test folders (optional)
+tests/
+tmp/
