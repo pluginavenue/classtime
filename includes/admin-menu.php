@@ -58,13 +58,18 @@ add_action('admin_menu', function () {
         'classtime_render_help_page'
     );
 
-    add_submenu_page(
-        'edit.php?post_type=classtime_class',
-        'Upgrade to ClassTime Pro',
-        '<span style="color: #d63638;">Upgrade to Pro 🚀</span>',
-        'manage_options',
-        'https://pluginavenue.com/classtime-pro/',
-        '', // No function needed for external link
-        null
-    );
+    if ( ! defined( 'CLASSTIME_PRO_VERSION' ) ) {
+        add_submenu_page(
+            'edit.php?post_type=classtime_class',
+            'Upgrade to ClassTime Pro',
+            '<span style="color: #d63638;">Upgrade to Pro 🚀</span>',
+            'manage_options',
+            'classtime-upgrade',
+            function () {
+                wp_redirect( 'https://pluginavenue.com/classtime/' );
+                exit;
+            },
+            null
+        );
+    }
 });
