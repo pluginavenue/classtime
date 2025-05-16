@@ -1,72 +1,99 @@
 === ClassTime ===
 Contributors: pluginavenue
-Tags: schedule, calendar, class schedule, martial arts, fitness, gym, recurring events, instructors
+Donate link: https://pluginavenue.com
+Tags: calendar, schedule, classes, dojo, fitness
 Requires at least: 5.8
-Tested up to: 6.5
+Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Create and display beautiful class schedules with instructor details, recurring events, and a clean calendar view. Perfect for gyms, dojos, and fitness programs.
+Manage class schedules with recurring events, instructor bios, and filters — perfect for dojos, gyms, and training programs.
 
 == Description ==
 
-**ClassTime** makes it easy to publish your weekly class schedule using a clean, modern calendar that supports:
-- Recurring weekly classes
-- Instructor bios with certifications
-- Class types and levels (like Adult Judo, All Levels, Yoga, etc.)
-- Class override notes (e.g., guest instructor or canceled)
+ClassTime is a lightweight yet powerful WordPress plugin that helps you manage class schedules and instructor profiles.
 
-It’s ideal for martial arts dojos, yoga studios, gyms, or fitness instructors who want a professional schedule embedded in their website.
+Whether you run a martial arts dojo, fitness gym, yoga studio, or any recurring training program, ClassTime allows you to:
 
-**Key Features:**
-- 📆 Weekly calendar with Month/Week/Day views
-- 🔁 Recurring classes (e.g., every Monday at 7PM)
-- 🧑‍🏫 Instructor profiles with bio and rank
-- 📎 Class types and levels (custom taxonomies)
-- 📝 Notes for each class session
-- 💻 Fully responsive and theme-compatible
-- 🎨 Dark/light theme support
+- Display a full-featured calendar of classes.
+- Set recurring classes (weekly).
+- Create instructor profiles with bios, certifications, and photos.
+- Tag classes by type (e.g., Adult Judo, Yoga) and level (e.g., Beginner, Intermediate).
+- Filter the calendar by instructor, type, and level.
 
-Looking for clinics, class overrides, and more? Check out [ClassTime Pro →](https://pluginavenue.com/plugins/classtime)
+**Easy to use, cleanly designed, and ready for your students.**
+
+== Features ==
+
+- Class Schedule Calendar with Filters
+- Recurring Weekly Classes
+- Instructor Profile Pages
+- Responsive Instructor Grid
+- Class Type and Class Level Tags
+- Mobile-Friendly Design
+- Lightweight and Fast
+- Easy-to-Use Shortcodes
+- Gutenberg Compatible (use the Shortcode block)
+
+== Shortcodes ==
+
+=== [classtime_calendar] ===
+Displays your full Class Schedule Calendar.
+
+=== [classtime_instructors] ===
+Displays a responsive grid of your published Instructors.
+
+You can insert these shortcodes into any Page, Post, or Widget using the WordPress editor or Gutenberg Shortcode block.
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/classtime/` directory, or install via Plugins > Add New.
-2. Activate the plugin through the ‘Plugins’ screen.
-3. Go to `ClassTime > All Classes` to start adding your schedule.
-4. Use the `[classtime_calendar]` shortcode on any page to show your calendar.
-
-== Screenshots ==
-
-1. Public calendar with class filters
-2. Class detail modal with instructor bio
-3. Instructor archive page with bios
-4. Admin: create a new recurring class
-5. Admin: manage class types and levels
+1. Upload the plugin files to the `/wp-content/plugins/classtime` directory, or install the plugin through the WordPress Plugins screen directly.
+2. Activate the plugin through the 'Plugins' screen in WordPress.
+3. Create classes under **ClassTime → All Classes**.
+4. Create instructor profiles under **ClassTime → All Instructors**.
+5. Insert `[classtime_calendar]` or `[classtime_instructors]` into any Page or Post to display your schedule or instructor grid.
 
 == Frequently Asked Questions ==
 
-= Can I use this for fitness or yoga classes instead of martial arts? =
-Yes! You can rename the class types and levels to fit your needs — ClassTime is designed to work for any program with a weekly schedule.
+= Can I cancel a class for a specific day? =
 
-= Does it support multiple instructors per class? =
-Yes, each class can have one or more instructors.
+Not in the free version. However, ClassTime Pro (available separately) allows you to cancel or customize individual classes by date.
 
-= Can I show the calendar on my homepage or a custom page? =
-Yes, just use the `[classtime_calendar]` shortcode anywhere.
+= Can I create recurring classes? =
+
+Yes! Set a start date, recurrence (weekly), and optional end date when creating a class.
+
+= Can I assign multiple instructors to a class? =
+
+Yes. First, create instructors under **ClassTime → Instructors**, then assign them to each class via the class editor.
+
+== Screenshots ==
+
+1. Frontend Class Schedule Calendar
+2. Instructor Profile Example
+3. Admin Interface for Managing Classes
+4. Admin Interface for Managing Instructors
+
+== Upgrade to Pro ==
+
+Want to cancel specific classes, add guest instructors, or highlight techniques?
+
+ClassTime Pro adds class overrides, instructor bios and profile images, clinic scheduling, and more.
+
+➡️ Learn more at https://pluginavenue.com/plugins/classtime
 
 == Changelog ==
 
 = 1.0.0 =
-* Initial release with custom class post type, recurrence, instructor profiles, calendar view, and modal support.
+* Initial release — Class Schedule Calendar, Instructor Profiles, Filters, and Recurring Events.
 
 == Upgrade Notice ==
 
 = 1.0.0 =
-Stable launch version of ClassTime.
+First release. Adds calendar, recurring classes, instructor profiles, and responsive grids.
 
-== Credits ==
+== License ==
 
-Developed by [Plugin Avenue](https://pluginavenue.com)
+This plugin is licensed under the GPLv2 or later.

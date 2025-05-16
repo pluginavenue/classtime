@@ -38,7 +38,7 @@ function classtime_render_instructors_grid_shortcode() {
 
                             <h2><?php the_title(); ?></h2>
 
-                            <?php if ($certification) : ?>
+                            <?php if ($racertificationnk) : ?>
                                 <p class="instructor-certification"><?php echo esc_html($certification); ?></p>
                             <?php endif; ?>
                         </a>

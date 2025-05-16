@@ -24,7 +24,6 @@ add_action('admin_enqueue_scripts', function($hook) {
 
 // ✅ Render the meta box content
 function classtime_render_instructor_meta_box($post) {
-    // ✅ Load existing meta
     $certification = get_post_meta($post->ID, '_classtime_instructor_certification', true);
     $bio = get_post_meta($post->ID, '_classtime_instructor_bio', true);
     $image_id = get_post_meta($post->ID, 'classtime_instructor_image', true);
@@ -108,22 +107,35 @@ function classtime_render_instructor_meta_box($post) {
 // ✅ Save the custom fields
 add_action('save_post', function($post_id) {
     if (get_post_type($post_id) !== 'classtime_instructor') return;
-    if (!isset($_POST['classtime_meta_nonce']) || !wp_verify_nonce($_POST['classtime_meta_nonce'], 'classtime_save_meta')) return;
+
+    if (!isset($_POST['classtime_meta_nonce'])) return;
+    $nonce = sanitize_text_field(wp_unslash($_POST['classtime_meta_nonce']));
+    if (!wp_verify_nonce($nonce, 'classtime_save_meta')) return;
+
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
     if (!current_user_can('edit_post', $post_id)) return;
 
     if (isset($_POST['classtime_instructor_certification'])) {
-        update_post_meta($post_id, '_classtime_instructor_certification', sanitize_text_field($_POST['classtime_instructor_certification']));
+        update_post_meta(
+            $post_id,
+            '_classtime_instructor_certification',
+            sanitize_text_field(wp_unslash($_POST['classtime_instructor_certification']))
+        );
     }
 
     if (function_exists('classtime_pro_is_active') && classtime_pro_is_active()) {
         if (isset($_POST['classtime_instructor_bio'])) {
-            update_post_meta($post_id, '_classtime_instructor_bio', wp_kses_post($_POST['classtime_instructor_bio']));
+            update_post_meta(
+                $post_id,
+                '_classtime_instructor_bio',
+                wp_kses_post(wp_unslash($_POST['classtime_instructor_bio']))
+            );
         }
 
         if (isset($_POST['classtime_instructor_image'])) {
-            update_post_meta($post_id, 'classtime_instructor_image', intval($_POST['classtime_instructor_image']));
-            set_post_thumbnail($post_id, intval($_POST['classtime_instructor_image']));
+            $image_id = intval(wp_unslash($_POST['classtime_instructor_image']));
+            update_post_meta($post_id, 'classtime_instructor_image', $image_id);
+            set_post_thumbnail($post_id, $image_id);
         }
     }
 });

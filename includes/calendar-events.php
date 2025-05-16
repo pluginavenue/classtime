@@ -9,8 +9,8 @@ function classtime_get_instructor_tooltip($instructor_name) {
 function classtime_smart_time($time) {
     $t = strtotime($time);
     if (!$t) return '';
-    $minutes = date('i', $t);
-    return date('g', $t) . ($minutes !== '00' ? ':' . $minutes : '') . ' ' . date('A', $t);
+    $minutes = gmdate('i', $t);
+    return gmdate('g', $t) . ($minutes !== '00' ? ':' . $minutes : '') . ' ' . gmdate('A', $t);
 }
 
 function classtime_get_events_json() {
@@ -82,8 +82,8 @@ function classtime_get_events_json() {
         $level_terms = get_the_terms($id, 'classtime_level');
         $type_name = ($type_terms && !is_wp_error($type_terms)) ? $type_terms[0]->name : '';
         $level_name = ($level_terms && !is_wp_error($level_terms)) ? $level_terms[0]->name : '';
-        $level_color = (!empty($level_terms)) ? get_term_meta($level_terms[0]->term_id, 'classtime_level_color', true) : '';
-        $badge_color = (!empty($type_terms)) ? get_term_meta($type_terms[0]->term_id, 'classtime_type_color', true) : '';
+        $level_color = (!empty($level_terms) && !is_wp_error($level_terms)) ? get_term_meta($level_terms[0]->term_id, 'classtime_level_color', true) : '';
+        $badge_color = (!empty($type_terms) && !is_wp_error($type_terms)) ? get_term_meta($type_terms[0]->term_id, 'classtime_type_color', true) : '';
 
         if (!$date || !$start_time) continue;
 
@@ -100,8 +100,6 @@ function classtime_get_events_json() {
             'notes' => $notes,
             'time' => $time_range,
             'badge_color' => $badge_color,
-            'level_color' => $level_color,
-            'override' => null,
         ];
 
         if ($recurrence === 'weekly' && is_array($days_of_week)) {
@@ -126,18 +124,19 @@ function classtime_get_events_json() {
 
                     if (isset($overrides_by_class_and_date[$override_key])) {
                         $ov = $overrides_by_class_and_date[$override_key];
-                        $props['override'] = $ov;
-
                         if (!empty($ov['cancelled'])) {
                             $classes[] = 'classtime-cancelled';
                             $title_lines[] = '❌ CANCELLED';
                         }
                         if (!empty($ov['guest_instructor'])) {
                             $title_lines[] = '👤 Guest Instructor...';
+                            $props['guest_instructor'] = true;
                         }
                         if (!empty($ov['technique_focus'])) {
                             $title_lines[] = '📘 Teaching Focus...';
+                            $props['technique_focus'] = true;
                         }
+                        $props['override_note'] = $ov['note'] ?? '';
                     }
 
                     if ($type_name) $title_lines[] = $type_name;
@@ -150,13 +149,14 @@ function classtime_get_events_json() {
                         'start' => $current->format('Y-m-d\T' . $start_dt->format('H:i:s')),
                         'end' => $end_dt ? $current->format('Y-m-d\T' . $end_dt->format('H:i:s')) : null,
                         'classNames' => $classes,
+                        'level_badge_color' => $level_color,
                         'extendedProps' => $props,
                     ];
 
                     $current->modify('+1 week');
                 }
             }
-        } else {
+        } elseif ($recurrence !== 'weekly') {
             $events[] = [
                 'title' => implode("\n", array_filter([
                     $type_name,
@@ -167,72 +167,8 @@ function classtime_get_events_json() {
                 'start' => $start_dt->format('Y-m-d\TH:i:s'),
                 'end' => $end_dt ? $end_dt->format('Y-m-d\TH:i:s') : null,
                 'classNames' => ['classtime-event'],
+                'level_badge_color' => $level_color,
                 'extendedProps' => $event_base,
-            ];
-        }
-    }
-    wp_reset_postdata();
-
-    // === Load clinics ===
-    $clinic_query = new WP_Query([
-        'post_type' => 'classtime_clinic',
-        'post_status' => 'publish',
-        'posts_per_page' => -1,
-    ]);
-
-    while ($clinic_query->have_posts()) {
-        $clinic_query->the_post();
-        $clinic_id = get_the_ID();
-
-        $clinic_title = get_the_title($clinic_id);
-        $clinic_info = get_post_meta($clinic_id, 'classtime_clinic_info', true);
-        $clinic_color = get_post_meta($clinic_id, '_classtime_clinic_color', true);
-        $session_times = get_post_meta($clinic_id, '_classtime_clinic_sessions', true);
-
-        $instructor_ids = get_post_meta($clinic_id, '_classtime_clinic_instructors', true);
-        $instructor_data = [];
-        if (!empty($instructor_ids) && is_array($instructor_ids)) {
-            foreach ($instructor_ids as $instructor_id) {
-                $instructor_data[] = [
-                    'id' => $instructor_id,
-                    'name' => get_the_title($instructor_id),
-                    'certification' => get_post_meta($instructor_id, '_classtime_instructor_certification', true),
-                    'link' => function_exists('classtime_pro_enabled') ? get_permalink($instructor_id) : '',
-                ];
-            }
-        }
-
-        $sessions_by_date = [];
-        if (is_array($session_times)) {
-            foreach ($session_times as $session) {
-                if (!empty($session['date']) && !empty($session['start']) && !empty($session['end'])) {
-                    $formatted = classtime_smart_time($session['start']) . '–' . classtime_smart_time($session['end']);
-                    $session['formatted'] = $formatted;
-                    $sessions_by_date[$session['date']][] = $formatted;
-                }
-            }
-        }
-
-        foreach ($sessions_by_date as $date => $time_ranges) {
-            $lines = [$clinic_title, ''];
-            foreach ($time_ranges as $range) {
-                $lines[] = $range;
-            }
-            $title = implode('<br>', $lines);
-
-            $events[] = [
-                'title' => $title,
-                'start' => $date . 'T00:00:00',
-                'end' => $date . 'T23:59:59',
-                'classNames' => ['classtime-clinic-session'],
-                'extendedProps' => [
-                    'clinic_id' => $clinic_id,
-                    'clinic_title' => $clinic_title,
-                    'clinic_info' => sanitize_textarea_field($clinic_info),
-                    'clinic_color' => $clinic_color,
-                    'instructors' => $instructor_data,
-                    'sessions' => $session_times,
-                ],
             ];
         }
     }
@@ -241,56 +177,80 @@ function classtime_get_events_json() {
     return $events;
 }
 
-add_action('wp_enqueue_scripts', function () {
-    if (is_page() && has_shortcode(get_post()->post_content ?? '', 'classtime_calendar')) {
-        wp_localize_script('classtime-calendar', 'classtimeCalendarData', [
-            'events' => classtime_get_events_json()
-        ]);
-    }
-}, 20);
-
 function classtime_render_calendar_shortcode() {
     ob_start();
     ?>
     <div id="classtime-filters-wrapper">
         <div class="filter-heading">Filter by:</div>
         <div id="classtime-filters">
-            <select id="instructor-filter">
-                <option value="">All Instructors</option>
-            </select>
-            <select id="type-filter">
-                <option value="">All Class Types</option>
-            </select>
-            <select id="level-filter">
-                <option value="">All Class Levels</option>
-            </select>
+            <?php
+            $instructors = [];
+            $query = new WP_Query([
+                'post_type'      => 'classtime_class',
+                'post_status'    => 'publish',
+                'posts_per_page' => -1,
+            ]);
+            while ($query->have_posts()) {
+                $query->the_post();
+                $list = get_post_meta(get_the_ID(), '_classtime_instructors', true);
+                if (is_array($list)) {
+                    foreach ($list as $instructor_id) {
+                        $name = get_the_title($instructor_id);
+                        if ($name && !in_array($name, $instructors)) {
+                            $instructors[] = $name;
+                        }
+                    }
+                }
+            }
+            wp_reset_postdata();
+            sort($instructors);
+            classtime_render_filter('instructor-filter', 'Instructor', $instructors);
+
+            $types = get_terms([
+                'taxonomy'   => 'classtime_type',
+                'hide_empty' => false,
+            ]);
+            $type_names = array_map(function($term) { return $term->name; }, $types);
+            sort($type_names);
+            classtime_render_filter('type-filter', 'Class Type', $type_names);
+
+            $levels = get_terms([
+                'taxonomy'   => 'classtime_level',
+                'hide_empty' => false,
+            ]);
+            $level_names = array_map(function($term) { return $term->name; }, $levels);
+            sort($level_names);
+            classtime_render_filter('level-filter', 'Class Level', $level_names);
+            ?>
         </div>
     </div>
 
     <div id="classtime-calendar" style="max-width: 1000px; margin: 2rem auto;"></div>
 
-    <!-- CLASS MODAL -->
     <div id="classtime-modal" class="classtime-modal">
-        <div class="classtime-modal-content">
-            <button class="classtime-modal-close" aria-label="Close">×</button>
-            <div class="classtime-override-banner"></div>
-            <h3 class="classtime-title">Class Type</h3>
-            <div class="classtime-level"></div>
-            <div class="classtime-time"></div>
-            <div class="classtime-instructors"></div>
-            <div class="classtime-notes"></div>
-        </div>
+      <div class="classtime-modal-content">
+        <button id="classtime-modal-close" class="classtime-modal-close">&times;</button>
+        <h2 class="classtime-title" style="text-align: center;"></h2>
+        <div class="classtime-override-labels" style="text-align: center; margin: 0.5rem 0;"></div>
+        <div class="classtime-override-note" style="font-weight: bold; font-size: 1.1rem; color: var(--classtime-accent); text-align: center; display: none; margin-bottom: 0.5rem;"></div>
+        <div class="classtime-level" style="margin-bottom: 0.5rem;"></div>
+        <p><strong>Time:</strong> <span class="classtime-time"></span></p>
+        <div><strong>Instructors:</strong><div class="classtime-instructors" style="margin-left: 1rem;"></div></div>
+        <div style="margin-top: 1rem;"><strong>Description:</strong><br><div class="classtime-notes" style="margin-left: 1rem;"></div></div>
+      </div>
     </div>
 
-    <!-- CLINIC MODAL -->
     <div id="classtime-clinic-modal" class="classtime-modal">
-        <div class="classtime-modal-content">
-            <button class="classtime-modal-close" aria-label="Close">×</button>
-            <h3 class="clinic-title">Clinic Title</h3>
-            <div class="clinic-notes"></div>
-        </div>
+      <div class="classtime-modal-content">
+        <button id="classtime-clinic-modal-close" class="classtime-modal-close">&times;</button>
+        <h2><span class="classtime-title"></span></h2>
+        <p><strong>Sessions:</strong></p>
+        <ul class="classtime-sessions"></ul>
+        <div class="classtime-info" style="margin-top: 1rem;"></div>
+      </div>
     </div>
     <?php
     return apply_filters('classtime_calendar_output', ob_get_clean());
 }
+
 add_shortcode('classtime_calendar', 'classtime_render_calendar_shortcode');

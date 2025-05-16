@@ -1,27 +1,59 @@
 :root {
-  --wp--preset--color--background: var(
-    --wp--preset--color--background,
-    #ffffff
-  );
-  --wp--preset--color--foreground: var(
-    --wp--preset--color--foreground,
-    #111111
-  );
-  --wp--preset--color--foreground-muted: var(
-    --wp--preset--color--foreground-muted,
-    #666666
-  );
-  --wp--preset--color--primary: var(--wp--preset--color--primary, #3478f6);
-  --wp--preset--color--contrast: var(--wp--preset--color--contrast, #1e1e1e);
-  --wp--preset--color--surface: var(--wp--preset--color--surface, #f3f4f6);
+  /* Base Colors (Light Mode) */
+  --classtime-bg-color: #f9f9f9;
+  --classtime-text-color: #222;
+  --classtime-muted-text: #666;
+  --classtime-accent: #4da6ff;
+
+  /* Event Colors */
+  --classtime-event-subtext: #888;
+  --classtime-event-hover-shadow: 0 0 5px #ffa500;
+
+  /* Filters */
+  --classtime-filter-bg: #1f2937;
+  --classtime-filter-text: #f9f9f9;
+  --classtime-filter-border: #555;
+  --classtime-filter-hover-bg: #374151;
+  --classtime-filter-hover-border: #888;
+
+  /* Modals */
+  --classtime-modal-bg: #1f1f1f;
+  --classtime-modal-text: #fff;
+  --classtime-overlay-bg: rgba(0, 0, 0, 0.7);
+
+  /* Tooltips */
+  --classtime-tooltip-bg: #333;
+  --classtime-tooltip-text: #fff;
 }
 
-body.dark {
-  --wp--preset--color--background: #111;
-  --wp--preset--color--foreground: #fff;
-  --wp--preset--color--foreground-muted: #ccc;
-  --wp--preset--color--contrast: #fff;
-  --wp--preset--color--surface: #1e1e1e;
+[data-theme="dark"],
+.is-dark-theme,
+body.dark-mode {
+  /* Base Colors (Dark Mode) */
+  --classtime-bg-color: #1e1e1e;
+  --classtime-text-color: #f0f0f0;
+  --classtime-muted-text: #bbb;
+  --classtime-accent: #66b2ff;
+
+  /* Event Colors */
+  --classtime-event-subtext: #aaa;
+  --classtime-event-hover-shadow: 0 0 5px #ffa500;
+
+  /* Filters */
+  --classtime-filter-bg: #374151;
+  --classtime-filter-text: #eee;
+  --classtime-filter-border: #666;
+  --classtime-filter-hover-bg: #4b5563;
+  --classtime-filter-hover-border: #999;
+
+  /* Modals */
+  --classtime-modal-bg: #2a2a2a;
+  --classtime-modal-text: #f9f9f9;
+  --classtime-overlay-bg: rgba(0, 0, 0, 0.85);
+
+  /* Tooltips */
+  --classtime-tooltip-bg: #555;
+  --classtime-tooltip-text: #eee;
 }
 
 /* ===============================
@@ -85,11 +117,11 @@ body.dark {
 }
 
 #classtime-calendar .fc-event div:nth-child(2) {
-  color: var(--wp--preset--color--foreground-muted, #888);
+  color: var(--classtime-event-subtext);
 }
 
 #classtime-calendar .fc-event:hover {
-  box-shadow: 0 0 5px var(--wp--preset--color--primary, #ffa500);
+  box-shadow: var(--classtime-event-hover-shadow);
 }
 
 /* ===============================
@@ -118,17 +150,18 @@ body.dark {
 #classtime-filters select {
   padding: 0.5rem;
   border-radius: 6px;
-  background-color: var(--wp--preset--color--contrast, #1f2937);
-  color: var(--wp--preset--color--background, #f9f9f9);
-  border: 1px solid var(--wp--preset--color--foreground-muted, #555);
+  background-color: var(--classtime-filter-bg);
+  color: var(--classtime-filter-text);
+  border: 1px solid var(--classtime-filter-border);
 }
 
 #classtime-filters select:hover {
-  background-color: var(--wp--preset--color--foreground-muted, #374151);
-  border-color: var(--wp--preset--color--foreground, #888);
+  background-color: var(--classtime-filter-hover-bg);
+  border-color: var(--classtime-filter-hover-border);
   transition: background-color 0.3s, border-color 0.3s;
 }
 
+/* Responsive for Filters */
 @media (max-width: 768px) {
   #classtime-filters {
     flex-direction: column;
@@ -143,42 +176,45 @@ body.dark {
 
 .classtime-modal {
   display: none;
-  opacity: 0;
   position: fixed;
-  z-index: 10010;
+  z-index: 10020;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0.75);
-  padding: 40px 20px;
-  transition: opacity 0.4s ease, background-color 0.4s ease;
+  overflow: auto;
+  background: var(--classtime-overlay-bg);
 }
 
 .classtime-modal.open {
-  display: flex;
-  opacity: 1;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
 .classtime-modal-content {
-  background: var(--wp--preset--color--contrast, #1c1c1c);
-  color: var(--wp--preset--color--background, white);
-  padding: 2rem;
+  background-color: var(--classtime-modal-bg);
+  color: var(--classtime-modal-text);
+  margin: 10% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
   border-radius: 12px;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   position: relative;
-  transform: scale(0.95);
-  opacity: 0;
-  transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
+.classtime-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--classtime-modal-text);
+  cursor: pointer;
+}
+
+/* When modal is opening */
 .classtime-modal.open .classtime-modal-content {
-  transform: scale(1);
+  transform: scale(1); /* grow to normal */
   opacity: 1;
 }
 
@@ -189,17 +225,6 @@ body.dark {
 
 .classtime-modal-content strong {
   font-weight: bold;
-}
-
-.classtime-modal-close {
-  position: absolute;
-  top: 10px;
-  right: 14px;
-  font-size: 24px;
-  background: none;
-  border: none;
-  color: var(--wp--preset--color--background, white);
-  cursor: pointer;
 }
 
 @media (max-width: 600px) {
@@ -222,15 +247,15 @@ body.dark {
 .instructor-with-tooltip {
   position: relative;
   display: inline-block;
-  color: var(--wp--preset--color--primary, #4da6ff);
+  color: var(--classtime-accent);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .instructor-tooltip {
   visibility: hidden;
-  background-color: var(--wp--preset--color--foreground, #333);
-  color: var(--wp--preset--color--background, #fff);
+  background-color: var(--classtime-tooltip-bg);
+  color: var(--classtime-tooltip-text);
   text-align: center;
   border-radius: 6px;
   padding: 6px 10px;
@@ -249,10 +274,6 @@ body.dark {
   word-break: break-word;
 }
 
-.instructor-tooltip div {
-  margin-bottom: 4px;
-}
-
 .instructor-tooltip::after {
   content: "";
   position: absolute;
@@ -261,29 +282,19 @@ body.dark {
   margin-left: -5px;
   border-width: 5px;
   border-style: solid;
-  border-color: var(--wp--preset--color--foreground, #333) transparent
-    transparent transparent;
+  border-color: var(--classtime-tooltip-bg) transparent transparent transparent;
 }
 
 .instructor-with-tooltip:hover .instructor-tooltip {
   visibility: visible;
   opacity: 1;
-  text-decoration: none;
 }
 
-/* ===============================
-   Smooth Fade-In for Tooltips
-================================== */
-
-.instructor-with-tooltip .instructor-tooltip {
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.instructor-with-tooltip:hover .instructor-tooltip {
-  visibility: visible;
-  opacity: 1;
+/* 🔧 Force bright instructor name color in all views */
+.fc-event .classtime-instructor-name,
+.fc-timegrid-event .classtime-instructor-name,
+.fc-daygrid-event .classtime-instructor-name {
+  color: #ffffff !important;
 }
 
 /* ===============================
@@ -291,18 +302,8 @@ body.dark {
 ================================== */
 
 .classtime-modal {
-  display: none;
   opacity: 0;
   transition: opacity 0.4s ease;
-  position: fixed;
-  z-index: 10010;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0.75);
-  padding: 40px 20px;
 }
 
 .classtime-modal.open {
@@ -315,7 +316,6 @@ body.dark {
 /* ===============================
    Responsive Tooltip for Mobile
 ================================== */
-
 @media (max-width: 600px) {
   .instructor-tooltip {
     font-size: 0.9rem;
@@ -326,4 +326,18 @@ body.dark {
     margin-left: -6px;
     border-width: 6px;
   }
+}
+
+.classtime-badge {
+  padding: 2px 8px;
+  font-size: 0.75em;
+  font-weight: bold;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+#classtime-calendar {
+  min-height: 400px;
+  width: 100%;
+  display: block;
 }

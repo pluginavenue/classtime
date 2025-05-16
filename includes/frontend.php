@@ -25,10 +25,21 @@ add_action('wp_enqueue_scripts', function () {
             CLASSTIME_VERSION
         );
 
-        // Load FullCalendar scripts for calendar only
+        // ✅ Load FullCalendar scripts from local assets
         if ($is_calendar_page) {
-            wp_enqueue_style('fullcalendar-css', 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css');
-            wp_enqueue_script('fullcalendar-js', 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js', [], null, true);
+            wp_enqueue_style(
+                'fullcalendar-css',
+                CLASSTIME_URL . 'assets/fullcalendar/index.global.min.css',
+                [],
+                '6.1.8'
+            );
+            wp_enqueue_script(
+                'fullcalendar-js',
+                CLASSTIME_URL . 'assets/fullcalendar/index.global.min.js',
+                [],
+                '6.1.8',
+                true
+            );
 
             wp_enqueue_script(
                 'classtime-calendar',
@@ -38,6 +49,9 @@ add_action('wp_enqueue_scripts', function () {
                 true
             );
 
+            wp_localize_script('classtime-calendar', 'classtimeCalendarData', [
+                'events' => classtime_get_events_json(),
+            ]);
         }
     }
 });
