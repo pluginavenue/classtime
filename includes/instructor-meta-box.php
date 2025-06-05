@@ -24,6 +24,7 @@ add_action('admin_enqueue_scripts', function($hook) {
 
 // ✅ Render the meta box content
 function classtime_render_instructor_meta_box($post) {
+    // ✅ Load existing meta
     $certification = get_post_meta($post->ID, '_classtime_instructor_certification', true);
     $bio = get_post_meta($post->ID, '_classtime_instructor_bio', true);
     $image_id = get_post_meta($post->ID, 'classtime_instructor_image', true);
@@ -54,15 +55,39 @@ function classtime_render_instructor_meta_box($post) {
     </p>
 
     <p>
-        <label for="classtime_instructor_image"><strong>Instructor Photo:</strong></label><br>
+    <label for="classtime_instructor_image"><strong>Instructor Photo:</strong></label><br>
         <?php if ($image_id): ?>
-            <img id="classtime_instructor_image_preview" src="<?php echo esc_url(wp_get_attachment_url($image_id)); ?>" alt="Instructor Image" style="width:120px;height:auto;margin-bottom:10px;display:block;">
+            <?php echo wp_get_attachment_image(
+                $image_id,
+                'thumbnail',
+                false,
+                [
+                    'id'    => 'classtime_instructor_image_preview',
+                    'style' => 'width:120px;height:auto;margin-bottom:10px;display:block;',
+                    'alt'   => esc_attr__('Instructor Image', 'classtime')
+                ]
+            ); ?>
         <?php else: ?>
-            <img id="classtime_instructor_image_preview" src="" style="display:none;width:120px;height:auto;margin-bottom:10px;">
+           <?php
+            // Optional: fallback image ID or blank image output
+            echo wp_get_attachment_image(
+                0,
+                'thumbnail',
+                false,
+                [
+                    'id'    => 'classtime_instructor_image_preview',
+                    'style' => 'display:none;width:120px;height:auto;margin-bottom:10px;',
+                    'alt'   => esc_attr__('Instructor Image', 'classtime'),
+                    'src'   => '', // fallback if needed
+                ]
+            );
+            ?>
+
         <?php endif; ?>
         <input type="hidden" name="classtime_instructor_image" id="classtime_instructor_image" value="<?php echo esc_attr($image_id); ?>">
         <button type="button" class="button" id="classtime_instructor_image_upload">Upload Image</button>
     </p>
+
 
     <script>
     (function($){
@@ -107,35 +132,38 @@ function classtime_render_instructor_meta_box($post) {
 // ✅ Save the custom fields
 add_action('save_post', function($post_id) {
     if (get_post_type($post_id) !== 'classtime_instructor') return;
-
-    if (!isset($_POST['classtime_meta_nonce'])) return;
-    $nonce = sanitize_text_field(wp_unslash($_POST['classtime_meta_nonce']));
-    if (!wp_verify_nonce($nonce, 'classtime_save_meta')) return;
-
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
     if (!current_user_can('edit_post', $post_id)) return;
 
-    if (isset($_POST['classtime_instructor_certification'])) {
-        update_post_meta(
-            $post_id,
-            '_classtime_instructor_certification',
-            sanitize_text_field(wp_unslash($_POST['classtime_instructor_certification']))
-        );
+    // 🔒 Get and sanitize the nonce safely
+    $nonce_raw = filter_input(INPUT_POST, 'classtime_meta_nonce', FILTER_UNSAFE_RAW);
+    if (!$nonce_raw) return;
+
+    $nonce = sanitize_text_field(wp_unslash($nonce_raw));
+    if (!wp_verify_nonce($nonce, 'classtime_save_meta')) return;
+
+    // ✅ Save certification (text)
+    $cert_raw = filter_input(INPUT_POST, 'classtime_instructor_certification', FILTER_UNSAFE_RAW);
+    if (!is_null($cert_raw)) {
+        update_post_meta($post_id, '_classtime_instructor_certification', sanitize_text_field(wp_unslash($cert_raw)));
     }
 
+    // ✅ Save bio and image (Pro only)
     if (function_exists('classtime_pro_is_active') && classtime_pro_is_active()) {
-        if (isset($_POST['classtime_instructor_bio'])) {
-            update_post_meta(
-                $post_id,
-                '_classtime_instructor_bio',
-                wp_kses_post(wp_unslash($_POST['classtime_instructor_bio']))
-            );
+        $bio_raw = filter_input(INPUT_POST, 'classtime_instructor_bio', FILTER_UNSAFE_RAW);
+        if (!is_null($bio_raw)) {
+            update_post_meta($post_id, '_classtime_instructor_bio', wp_kses_post(wp_unslash($bio_raw)));
         }
 
-        if (isset($_POST['classtime_instructor_image'])) {
-            $image_id = intval(wp_unslash($_POST['classtime_instructor_image']));
+        $image_raw = filter_input(INPUT_POST, 'classtime_instructor_image', FILTER_UNSAFE_RAW);
+        if (!is_null($image_raw)) {
+            $image_id = intval($image_raw);
             update_post_meta($post_id, 'classtime_instructor_image', $image_id);
             set_post_thumbnail($post_id, $image_id);
         }
     }
 });
+
+
+
+

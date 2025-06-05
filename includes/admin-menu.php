@@ -23,7 +23,7 @@ add_action('admin_menu', function () {
         'manage_options',
         'edit.php?post_type=classtime_class'  // Link back to CPT list
     );
-
+    
     // Submenus under ClassTime
     add_submenu_page(
         'edit.php?post_type=classtime_class',
@@ -58,19 +58,13 @@ add_action('admin_menu', function () {
         'classtime_render_help_page'
     );
 
-    // ✅ Only show upgrade link if Pro is NOT active
-    if (!function_exists('classtime_pro_enabled') || !classtime_pro_enabled()) {
-        add_submenu_page(
-            'edit.php?post_type=classtime_class',
-            'Upgrade to ClassTime Pro',
-            '<span style="color: #d63638;">Upgrade to Pro 🚀</span>',
-            'manage_options',
-            'classtime-upgrade',
-            function () {
-                echo '<div class="wrap"><h1>Upgrade to ClassTime Pro</h1>';
-                echo '<p><a class="button button-primary" href="https://pluginavenue.com/plugins/classtime" target="_blank">Learn More</a></p>';
-                echo '</div>';
-            }
-        );
-    }
+    add_submenu_page(
+        'edit.php?post_type=classtime_class',
+        'Upgrade to ClassTime Pro',
+        '<span style="color: #d63638;">Upgrade to Pro 🚀</span>',
+        'manage_options',
+        'https://pluginavenue.com/classtime-pro/',
+        '', // No function needed for external link
+        null
+    );
 });

@@ -1,7 +1,7 @@
 === ClassTime ===
 Contributors: pluginavenue
 Donate link: https://pluginavenue.com
-Tags: calendar, schedule, classes, dojo, fitness
+Tags: calendar, schedule, classes, dojo, events
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
@@ -9,7 +9,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Manage class schedules with recurring events, instructor bios, and filters — perfect for dojos, gyms, and training programs.
+Easily manage class schedules with recurring events and instructor bios. Great for martial arts dojos, fitness studios, and other training programs.
 
 == Description ==
 

@@ -11,6 +11,7 @@
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: classtime
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;
@@ -36,16 +37,3 @@ require_once CLASSTIME_PATH . 'includes/template-loader.php';
 require_once CLASSTIME_PATH . 'includes/frontend-filters.php';
 require_once CLASSTIME_PATH . 'includes/frontend-instructors.php';
 require_once CLASSTIME_PATH . 'includes/admin-help.php';
-
-// ✅ Force Classic Editor for classtime_instructor (Gutenberg breaks wp_editor)
-add_filter('use_block_editor_for_post_type', function ($use_block_editor, $post_type) {
-    if ($post_type === 'classtime_instructor') {
-        return false;
-    }
-    return $use_block_editor;
-}, 10, 2);
-
-// ✅ Ensure editor scripts are loaded (TinyMCE, QuickTags, etc)
-add_action('admin_enqueue_scripts', function () {
-    wp_enqueue_editor();
-});

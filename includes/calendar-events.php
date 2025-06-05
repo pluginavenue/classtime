@@ -13,6 +13,7 @@ function classtime_smart_time($time) {
     return gmdate('g', $t) . ($minutes !== '00' ? ':' . $minutes : '') . ' ' . gmdate('A', $t);
 }
 
+
 function classtime_get_events_json() {
     $events = [];
 
@@ -58,17 +59,22 @@ function classtime_get_events_json() {
         $start_time   = get_post_meta($id, '_classtime_start', true);
         $end_time     = get_post_meta($id, '_classtime_end', true);
         $recurrence   = get_post_meta($id, '_classtime_recurrence', true);
-        $days_of_week = get_post_meta($id, '_classtime_day', true);
+        $days_of_week = get_post_meta($id, '_classtime_day', true); // array
         $repeat_until = get_post_meta($id, '_classtime_repeat_until', true);
         $notes        = get_post_meta($id, '_classtime_notes', true);
 
         $instructor_ids = get_post_meta($id, '_classtime_instructors', true);
-        $instructors = [];
+       $instructors = [];
         if (!empty($instructor_ids) && is_array($instructor_ids)) {
             foreach ($instructor_ids as $instructor_id) {
                 $instructor_name = get_the_title($instructor_id);
                 $instructor_certification = get_post_meta($instructor_id, '_classtime_instructor_certification', true);
-                $link = function_exists('classtime_pro_enabled') ? get_permalink($instructor_id) : '';
+
+                // Only include link if Pro is active
+                $link = (function_exists('classtime_pro_is_active') && classtime_pro_is_active())
+                    ? get_permalink($instructor_id)
+                    : '';
+
                 $instructors[] = [
                     'id' => $instructor_id,
                     'name' => $instructor_name,
@@ -82,7 +88,12 @@ function classtime_get_events_json() {
         $level_terms = get_the_terms($id, 'classtime_level');
         $type_name = ($type_terms && !is_wp_error($type_terms)) ? $type_terms[0]->name : '';
         $level_name = ($level_terms && !is_wp_error($level_terms)) ? $level_terms[0]->name : '';
-        $level_color = (!empty($level_terms) && !is_wp_error($level_terms)) ? get_term_meta($level_terms[0]->term_id, 'classtime_level_color', true) : '';
+        $level_color = '';
+        if (function_exists('classtime_pro_is_active') && classtime_pro_is_active()) {
+            if (!empty($level_terms) && !is_wp_error($level_terms)) {
+                $level_color = get_term_meta($level_terms[0]->term_id, 'classtime_level_color', true);
+            }
+        }
         $badge_color = (!empty($type_terms) && !is_wp_error($type_terms)) ? get_term_meta($type_terms[0]->term_id, 'classtime_type_color', true) : '';
 
         if (!$date || !$start_time) continue;
@@ -110,7 +121,7 @@ function classtime_get_events_json() {
                 $day = strtolower(trim($day));
                 $current = clone $start_dt;
                 $start_day = strtolower($start_dt->format('l'));
-
+                
                 if ($start_day !== strtolower($day)) {
                     $current->modify("next $day");
                 }
@@ -156,7 +167,10 @@ function classtime_get_events_json() {
                     $current->modify('+1 week');
                 }
             }
-        } elseif ($recurrence !== 'weekly') {
+        }
+
+        // Fallback for non-recurring single date
+        elseif ($recurrence !== 'weekly') {
             $events[] = [
                 'title' => implode("\n", array_filter([
                     $type_name,
@@ -180,6 +194,7 @@ function classtime_get_events_json() {
 function classtime_render_calendar_shortcode() {
     ob_start();
     ?>
+    <!-- Filters -->
     <div id="classtime-filters-wrapper">
         <div class="filter-heading">Filter by:</div>
         <div id="classtime-filters">
@@ -195,6 +210,7 @@ function classtime_render_calendar_shortcode() {
                 $list = get_post_meta(get_the_ID(), '_classtime_instructors', true);
                 if (is_array($list)) {
                     foreach ($list as $instructor_id) {
+                        $instructor_certification = get_post_meta($instructor_id, '_classtime_instructor_certification', true);    
                         $name = get_the_title($instructor_id);
                         if ($name && !in_array($name, $instructors)) {
                             $instructors[] = $name;
@@ -225,30 +241,51 @@ function classtime_render_calendar_shortcode() {
         </div>
     </div>
 
+    <!-- Calendar -->
     <div id="classtime-calendar" style="max-width: 1000px; margin: 2rem auto;"></div>
 
-    <div id="classtime-modal" class="classtime-modal">
-      <div class="classtime-modal-content">
-        <button id="classtime-modal-close" class="classtime-modal-close">&times;</button>
-        <h2 class="classtime-title" style="text-align: center;"></h2>
-        <div class="classtime-override-labels" style="text-align: center; margin: 0.5rem 0;"></div>
-        <div class="classtime-override-note" style="font-weight: bold; font-size: 1.1rem; color: var(--classtime-accent); text-align: center; display: none; margin-bottom: 0.5rem;"></div>
-        <div class="classtime-level" style="margin-bottom: 0.5rem;"></div>
-        <p><strong>Time:</strong> <span class="classtime-time"></span></p>
-        <div><strong>Instructors:</strong><div class="classtime-instructors" style="margin-left: 1rem;"></div></div>
-        <div style="margin-top: 1rem;"><strong>Description:</strong><br><div class="classtime-notes" style="margin-left: 1rem;"></div></div>
-      </div>
+   <!-- ✅ CLASS MODAL -->
+   <!-- ✅ CLASS MODAL -->
+<div id="classtime-modal" class="classtime-modal">
+  <div class="classtime-modal-content">
+    <button id="classtime-modal-close" class="classtime-modal-close">&times;</button>
+
+    <h2 class="classtime-title" style="text-align: center;"></h2>
+    <div class="classtime-override-labels" style="text-align: center; margin: 0.5rem 0;"></div>
+    <div class="classtime-override-note" style="font-weight: bold; font-size: 1.1rem; color: var(--classtime-accent); text-align: center; display: none; margin-bottom: 0.5rem;"></div>
+
+    <div class="classtime-level" style="margin-bottom: 0.5rem;"></div>
+
+    <p><strong>Time:</strong> <span class="classtime-time"></span></p>
+
+    <div>
+      <strong>Instructors:</strong>
+      <div class="classtime-instructors" style="margin-left: 1rem;"></div>
     </div>
 
-    <div id="classtime-clinic-modal" class="classtime-modal">
-      <div class="classtime-modal-content">
-        <button id="classtime-clinic-modal-close" class="classtime-modal-close">&times;</button>
-        <h2><span class="classtime-title"></span></h2>
-        <p><strong>Sessions:</strong></p>
-        <ul class="classtime-sessions"></ul>
-        <div class="classtime-info" style="margin-top: 1rem;"></div>
-      </div>
+    <div style="margin-top: 1rem;">
+      <strong>Description:</strong><br>
+      <div class="classtime-notes" style="margin-left: 1rem;"></div>
     </div>
+  </div>
+</div>
+
+
+  <!-- ✅ CLINIC MODAL -->
+<div id="classtime-clinic-modal" class="classtime-modal">
+  <div class="classtime-modal-content">
+    <button id="classtime-clinic-modal-close" class="classtime-modal-close">&times;</button>
+
+    <h2><span class="classtime-title"></span></h2>
+    <p><strong>Sessions:</strong></p>
+    <ul class="classtime-sessions"></ul>
+    <div class="classtime-info" style="margin-top: 1rem;"></div>
+  </div>
+</div>
+
+</div>
+
+
     <?php
     return apply_filters('classtime_calendar_output', ob_get_clean());
 }

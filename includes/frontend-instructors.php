@@ -33,7 +33,16 @@ function classtime_render_instructors_grid_shortcode() {
                     <div class="instructor-card">
                         <a href="<?php the_permalink(); ?>" style="text-decoration: none; color: inherit;">
                             <div class="instructor-photo">
-                                <img src="<?php echo esc_url($image_url); ?>" alt="<?php the_title_attribute(); ?>">
+                               <?php
+                                    echo wp_get_attachment_image(
+                                        $image_id,               // Attachment ID — must be set earlier
+                                        'medium',                // Size (or use 'thumbnail', 'full', etc.)
+                                        false,                   // Icon fallback (false means "don't use icon")
+                                        [
+                                            'alt' => get_the_title(), // Alt text
+                                        ]
+                                    );
+                                    ?>
                             </div>
 
                             <h2><?php the_title(); ?></h2>

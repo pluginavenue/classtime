@@ -1,39 +1,33 @@
-# Ignore OS/system files
+# Ignore node/npm files
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Ignore macOS system files
 .DS_Store
+
+# Ignore IDE/editor config
+.vscode/
+.idea/
+
+# Ignore OS/hidden/system files
 Thumbs.db
+ehthumbs.db
 desktop.ini
+
+# Ignore WordPress core or build files (if not needed)
+wp-config.php
+.htaccess
+
+# Ignore zip and backup files
+*.zip
+*.bak
+*.tmp
+*.tar.gz
 
 # Ignore log files
 *.log
 debug.log
 
-# Ignore IDE/editor settings
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# Ignore node/npm files if used
-node_modules/
-npm-debug.log
-yarn.lock
-package-lock.json
-
-# Ignore Composer dependencies if not bundled
-vendor/
-composer.lock
-
-# Ignore Freemius SDK dev tools (optional)
-freemius/.git/
-freemius/.github/
-freemius/dev/
-
-# Ignore WordPress backups or temp files
-*.zip
-*.bak
-*.tmp
-~*
-
-# Ignore test folders (optional)
-tests/
-tmp/
+# Ignore Git itself
+.git/
